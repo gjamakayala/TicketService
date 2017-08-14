@@ -36,6 +36,6 @@ Future Enhancements:
 1. Enhance to provide the ability to manage multiple ticket venues.
 2. Enhance TicketService interface to accept venueId and hold/reserve seats against a specific venue
 3. Possibly enhance with other types of ticket services. Ex: sports, movie, concert tickets etc.
-4. Enhance and scale the application multi-thread support.
+4. Enhance and scale the application with multi-thread support.
 5. Improve messaging by adjusting the log levels and using application specific TicketServiceException.
 
