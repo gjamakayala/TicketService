@@ -64,7 +64,7 @@ public abstract class TicketVenue {
 	*
 	*/
 	public void displayVenueSeats() {
-		
+		logger.debug("Display of venue seats...");
 		StringBuffer buf = new StringBuffer();
 		for (int i=0; i<seatList.size(); i++) {
 			BitSet row = seatList.get(i);
@@ -95,7 +95,7 @@ public abstract class TicketVenue {
 		for (Seat seat : seatHold.getSeats()) {
 			buf.append(seat.getSeatInfo());
 		}
-		logger.debug("seatHoldId: " + seatHoldId);
+		logger.debug("Assigned seats with seatHoldId: " + seatHoldId);
 		logger.debug("--------------------");
 		logger.debug(buf.toString());
 		logger.debug("--------------------");
