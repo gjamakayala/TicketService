@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.Date;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -85,7 +87,33 @@ public class SimpleTicketService implements TicketService {
 		SeatHold seatHold = new SeatHold(numSeats, customerEmail);
 		seatHold.setSeats(assignedSeats);
 		ticketVenue.getSeatHoldMap().put(seatHold.getSeatHoldId(), seatHold);
+		
+		//Schedule a timer task to run after the reserve time limit 
+		//to release held seats if not reserved by then. 
+		Timer timer = new Timer();
+		TimerTask timerTask = new ReleaseSeatsTimerTask(seatHold.getSeatHoldId());
+		timer.schedule(timerTask, ticketVenue.getReserveTimeLimitSecs() * 1000);
+		
 		return seatHold;
+	}
+	
+	/**
+	 * class ReleaseSeatsTimerTask provides seatHoldId to release seats
+	 *
+	 */
+	class ReleaseSeatsTimerTask extends TimerTask {
+		int seatHoldId;
+		
+		ReleaseSeatsTimerTask(int seatHoldId) {
+			this.seatHoldId = seatHoldId;
+		}
+		@Override
+		public void run() {
+			logger.debug("Timer task attempting to release seats if held seats are not reserved with in the specified time limit.");
+			releaseHeldSeats(seatHoldId);
+			ticketVenue.displayVenueSeats();
+			
+		}
 	}
 	
 	/**
@@ -104,7 +132,7 @@ public class SimpleTicketService implements TicketService {
 		}
 		
 		if (isTicketSeatHoldExpired(seatHold)) {
-			releaseHeldSeats(seatHold);
+			releaseHeldSeats(seatHoldId);
 			logger.debug("Reserve time limit exceeded. Please retry again.");
 			return null;
 		}
@@ -115,14 +143,20 @@ public class SimpleTicketService implements TicketService {
 	
 	/**
 	 * Release held seats
-	 * @param seatHold Object which holds seats
+	 * @param seatHoldId SeatHold Id
 	 */
-	private void releaseHeldSeats(SeatHold seatHold) {
-		for (Seat seat : seatHold.getSeats()) {
-			BitSet seatRow = ticketVenue.getSeatList().get(seat.getRowNum()-1);
-			seatRow.clear(seat.getSeatNumInRow()-1);
+	private void releaseHeldSeats(int seatHoldId) {
+		SeatHold seatHold = ticketVenue.getSeatHoldMap().get(seatHoldId);
+		if (seatHold != null && !seatHold.isReserved()) {
+			int numSeats = seatHold.getSeats().size();
+			logger.debug("Releasing seats");
+			for (Seat seat : seatHold.getSeats()) {
+				BitSet seatRow = ticketVenue.getSeatList().get(seat.getRowNum()-1);
+				seatRow.clear(seat.getSeatNumInRow()-1);
+			}
+			ticketVenue.getSeatHoldMap().remove(seatHold.getSeatHoldId());
+			ticketVenue.setSeatsAvailable(ticketVenue.getSeatsAvailable() + numSeats);
 		}
-		ticketVenue.getSeatHoldMap().remove(seatHold.getSeatHoldId());
 	}
 	
 	/**

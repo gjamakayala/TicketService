@@ -65,9 +65,11 @@ public class TicketServiceMain {
 				}
 			}
 		}
-		
-		input.close();
+		if (input != null) {
+			input.close();
+		}
 		logger.debug("Thank you for using Ticket Service!");
+		System.exit(0);
 	}
 	
 	private static int readNumSeats(Scanner input) {
@@ -105,18 +107,13 @@ public class TicketServiceMain {
 	private static String readConfirmChoice(Scanner input) {
 		String confirmChoiceEntry = null;
 		boolean validEntry = false;
-		logger.debug("Confirm seats? [Y/N]: ");
 		do {
-			try {
-				confirmChoiceEntry = input.nextLine();
-				if (confirmChoiceEntry != null && 
-						(confirmChoiceEntry.equalsIgnoreCase("Y") || confirmChoiceEntry.equalsIgnoreCase("N"))) {
-					 validEntry = true;
-				}
-			   
-			} catch (Exception ex) {
-				logger.debug("Please enter a valid customer email: ");
-			}
+			logger.debug("Confirm seats? [Y/N]: ");
+			confirmChoiceEntry = input.nextLine();
+			if (confirmChoiceEntry != null && 
+					(confirmChoiceEntry.equalsIgnoreCase("Y") || confirmChoiceEntry.equalsIgnoreCase("N"))) {
+				 validEntry = true;
+			}			   
 		} while (!validEntry);
 		return confirmChoiceEntry;
 	}	
